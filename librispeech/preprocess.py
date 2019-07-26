@@ -30,6 +30,23 @@ def parse_args():
 
     return args
 
+def compute_mfcc(audio_data, sample_rate):
+    ''' Computes the mel-frequency cepstral coefficients.
+    The audio time series is normalised and its mfcc features are computed.
+    Args:
+        audio_data: time series of the speech utterance.
+        sample_rate: sampling rate.
+    Returns:
+        mfcc_feat:[num_frames x F] matrix representing the mfcc.
+    '''
+
+    audio_data = audio_data - np.mean(audio_data)
+    audio_data = audio_data / np.max(audio_data)
+    mfcc_feat = mfcc(audio_data, sample_rate, winlen=FRAME_LENGTH, winstep=FRAME_SHIFT,
+                     numcep=39, nfilt=2*39, nfft=512, lowfreq=0, highfreq=sample_rate/2,
+                     preemph=0.97, ceplifter=22, appendEnergy=True)
+    return mfcc_feat
+
 def make_example(spec_feat, labels):
     ''' Creates a SequenceExample for a single utterance.
     This function makes a SequenceExample given the sequence length,
