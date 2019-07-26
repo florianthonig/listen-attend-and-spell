@@ -128,12 +128,8 @@ def create_records(audio_path, output_path):
             continue
         
         print('Processing' + partition)
-        feats, transcripts, utt_len = process_data(partition)
-        sorted_utts = sorted(utt_len, key=utt_len.get)
-        # bin into groups of 100 frames.
-        max_t = int(utt_len[sorted_utts[-1]]/100)
-        min_t = int(utt_len[sorted_utts[0]]/100)
-
+        feats, transcripts = process_data(partition)
+        
         # Create destination directory
         write_dir = output_path
         if tf.io.gfile.exists(write_dir):
@@ -145,7 +141,7 @@ def create_records(audio_path, output_path):
                                 '.tfrecords')
         print('Creating', filename)
         record_writer = tf.python_io.TFRecordWriter(filename)
-        for utt in tqdm(sorted_utts):
+        for utt in tqdm(range(len(transcripts))):
             example = make_example(feats[utt].tolist(),
                                     transcripts[utt])
             record_writer.write(example)
