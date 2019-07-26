@@ -2,7 +2,8 @@ import os
 import sys
 import string
 from argparse import ArgumentParser
-
+import glob
+from python_speech_features import mfcc
 import numpy as np
 import scipy.io.wavfile as wav
 
@@ -16,6 +17,9 @@ try:
 except:
     raise ImportError('Run`pip install soundfile` first')
 
+FRAME_LENGTH = 0.025
+FRAME_SHIFT = 0.01
+FEATURE_VECTOR_SIZE = 39 # this implementation used 39 features
 
 s = set()
 
@@ -43,7 +47,7 @@ def compute_mfcc(audio_data, sample_rate):
     audio_data = audio_data - np.mean(audio_data)
     audio_data = audio_data / np.max(audio_data)
     mfcc_feat = mfcc(audio_data, sample_rate, winlen=FRAME_LENGTH, winstep=FRAME_SHIFT,
-                     numcep=39, nfilt=2*39, nfft=512, lowfreq=0, highfreq=sample_rate/2,
+                     numcep=FEATURE_VECTOR_SIZE, nfilt=2*FEATURE_VECTOR_SIZE, nfft=512, lowfreq=0, highfreq=sample_rate/2,
                      preemph=0.97, ceplifter=22, appendEnergy=True)
     return mfcc_feat
 
@@ -99,7 +103,7 @@ def process_data(partition):
     feats = {}
     transcripts = {}
 
-    for filename in tqdm(glob.iglob(partition+'/**/*.txt', recursive=True)):
+    for filename in glob.iglob(partition+'/**/*.txt', recursive=True):
         with open(filename, 'r') as file:
             for line in file:
                 parts = line.split()
