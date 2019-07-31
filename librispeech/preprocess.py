@@ -6,6 +6,7 @@ import glob
 from python_speech_features import mfcc
 import numpy as np
 import scipy.io.wavfile as wav
+import tensorflow as tf
 
 try:
     import speechpy
@@ -71,7 +72,7 @@ def make_example(spec_feat, labels):
         Serialized sequence example.
     '''
     
-    s.update(labels)
+    s.update(labels.split(' '))
     # Feature lists for the sequential features of the example
     feature_lists = tf.train.FeatureLists(feature_list={
         'labels': tf.train.FeatureList(feature=[
@@ -100,8 +101,8 @@ def process_data(partition):
                  utterance in time frames.
     """
 
-    feats = {}
-    transcripts = {}
+    feats = []
+    transcripts = []
 
     for filename in glob.iglob(partition+'/**/*.txt', recursive=True):
         with open(filename, 'r') as file:
@@ -111,9 +112,10 @@ def process_data(partition):
                 file_path = os.path.join(os.path.dirname(filename),
                                          audio_file+'.flac')
                 audio, sample_rate = sf.read(file_path)
-                feats[audio_file] = compute_mfcc(audio, sample_rate)
-                target = ' '.join(parts[1:])
-                transcripts[audio_file] = target
+                feats.append(compute_mfcc(audio, sample_rate))
+                s = ' '.join(parts[1:])
+                translator = str.maketrans('', '', string.punctuation)
+                transcripts.append(s.translate(translator).lower())
     
     return feats, transcripts
 
@@ -123,34 +125,27 @@ def create_records(audio_path, output_path):
     into integers, and generates sequence examples for each utterance.
     Multiple sequence records are then written into TFRecord files.
     """
-    for partition in sorted(glob.glob(audio_path+'/*')):
-        if os.path.basename(partition) == 'processed':
-            continue
-        
+    for partition in sorted(glob.glob(audio_path+'/*')):        
         print('Processing' + partition)
         feats, transcripts = process_data(partition)
-        
         # Create destination directory
         write_dir = output_path
-        if tf.io.gfile.exists(write_dir):
-            tf.gfile.DeleteRecursively(write_dir)
-        tf.io.gfile.makedirs(write_dir)
-
         # Create single TFRecord for dev and test partition
-        filename = os.path.join(write_dir, os.path.basename(write_dir) +
+        filename = os.path.join(write_dir, os.path.basename(partition) +
                                 '.tfrecords')
         print('Creating', filename)
         record_writer = tf.python_io.TFRecordWriter(filename)
-        for utt in tqdm(range(len(transcripts))):
-            example = make_example(feats[utt].tolist(),
+        for utt in range(len(transcripts)):
+            example = make_example(feats[utt],
                                     transcripts[utt])
             record_writer.write(example)
         record_writer.close()
-        print('Processed '+str(len(sorted_utts))+' audio files')
+        print('Processed '+str(len(transcripts))+' audio files')
             
 def main(args):
     create_records(args.data_dir, args.output_dir)
     d = sorted(list(s))
+    print('Creating vocabulary table')
     with open(args.output_dir+'/vocab.table', 'w') as f:
         print('\n'.join(d), file=f)
 
