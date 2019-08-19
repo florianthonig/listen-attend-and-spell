@@ -6,6 +6,7 @@ import glob
 from python_speech_features import mfcc
 import numpy as np
 import scipy.io.wavfile as wav
+import tensorflow as tf
 
 try:
     import speechpy
