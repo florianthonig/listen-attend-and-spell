@@ -1,5 +1,5 @@
-MODEL_DIR=./model
-VOCAB_PATH=./tfdata/vocab.table
+MODEL_DIR=./tensorboard/libri-vctk-hparams-full-corpus/
+VOCAB_PATH=./vocab/vocab_libri.table
 
 INPUT_FILE="$1"
 
