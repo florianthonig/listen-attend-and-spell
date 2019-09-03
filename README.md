@@ -8,7 +8,8 @@
 
 ### Requirements
 
-Tensorflow and Numpy are needed. Run `pip install -r requirements.txt` to get the lastest version.
+Tensorflow and Numpy are needed. ~~Run `pip install -r requirements.txt` to get the lastest version~~.
+Please see the README in the submodule folder.
 
 ### Data Preparing
 Before running the training script, you should convert your data into TFRecord format. The code snippet down below may help you understand how to create it:
