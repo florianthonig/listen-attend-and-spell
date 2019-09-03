@@ -9,11 +9,6 @@ import scipy.io.wavfile as wav
 import tensorflow as tf
 
 try:
-    import speechpy
-except:
-    raise ImprtError('Run `pip install speechpy` first')
-
-try:
     import soundfile as sf
 except:
     raise ImportError('Run `pip install soundfile` first')
