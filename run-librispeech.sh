@@ -10,10 +10,10 @@ DATA_MODEL_DIR=$ROOT_DIR/model
 mkdir -p $DATA_TF_DIR
 
 echo Processing dataset ...
-python3.6 $REPO_LS_DIR/preprocess.py --data_dir $DATA_DIR --output_dir $DATA_TF_DIR
+python3 $REPO_LS_DIR/preprocess.py --data_dir $DATA_DIR --output_dir $DATA_TF_DIR
 
 echo Training ...
-#python3.6 train.py --train $VCTK_TF_DIR/train.tfrecord \
+python3 train.py --train $VCTK_TF_DIR/train.tfrecord \
                  --valid $VCTK_TF_DIR/test.tfrecord \
                  --vocab $VCTK_TF_DIR/vocab.table \
                  --model_dir $VCTK_MODEL_DIR \
